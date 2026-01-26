@@ -1,0 +1,92 @@
+model Recipe {
+  id String @id @default(cuid())
+
+  title       String
+  description String
+  calories    Int
+  cookingTime Int        @map("cooking_time")
+  difficulty  Difficulty
+
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String @map("author_id")
+
+  recipeSteps       RecipeStep[]
+  recipeIngredients RecipeIngredient[]
+  comments          Comment[]
+  likes             Like[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("recipes")
+}
+
+model Ingredient {
+  id String @id @default(cuid())
+
+  name        String
+  defaultUnit Unit   @map("default_unit")
+
+  recipeIngredients RecipeIngredient[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("ingredients")
+}
+
+model RecipeIngredient {
+  id String @id @default(cuid())
+
+  name     String
+  iconURL  String  @map("icon_url")
+  content  String
+  quantity Decimal
+  unit     Unit
+  price    Decimal
+
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  recipeId String @map("recipe_id")
+
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId String     @map("ingredient_id")
+
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([recipeId, ingredientId])
+  @@map("recipe_ingredients")
+}
+
+model RecipeStep {
+  id String @id @default(cuid())
+
+  order       Int
+  title       String
+  description String
+
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  recipeId String @map("recipe_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("recipe_steps")
+}
+
+enum Unit {
+  GRAMM // гр
+  MILLILITER // мл
+  PIECE // шт
+  TEASPOON // ч.л.
+  TABLESPOON // ст.л.
+  CLOVES // зубчик
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
