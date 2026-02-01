@@ -5,7 +5,7 @@ import { UsersService } from './users.service'
 export class UsersResolver {
 	constructor(private readonly usersService: UsersService) {}
 
-	@Query(() => String, { name: 'profile' })
+	@Query(() => String, { name: 'getProfile' })
 	getProfile() {
 		return 'John Doe'
 	}

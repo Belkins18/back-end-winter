@@ -8,7 +8,7 @@ interface GraphQLContext {
 	res: Response
 }
 
-export const getGraphQLConfig = (
+export const getConfig = (
 	configService: ConfigService
 ): ApolloDriverConfig => ({
 	autoSchemaFile: true,
