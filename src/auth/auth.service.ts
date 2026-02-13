@@ -14,7 +14,7 @@ import { UsersService } from 'src/users/users.service'
 import { Response } from 'express'
 import { UTILS } from 'src/utils'
 import { AuthInput } from './auth.input'
-import { IAuthTokenData } from './auth.interface'
+import { TAuthTokenData } from './auth.interface'
 
 @Injectable()
 export class AuthService {
@@ -90,7 +90,7 @@ export class AuthService {
 		return user
 	}
 
-	private generateTokens(data: IAuthTokenData) {
+	private generateTokens(data: TAuthTokenData) {
 		const accessToken = this.jwt.sign(data, {
 			expiresIn: '1h'
 		})

@@ -5,8 +5,8 @@ model User {
   password String
   role     Role   @default(USER)
 
-  profile         Profile?
-  bodyMeasurement BodyMeasurement?
+  profile      Profile?
+  measurements BodyMeasurement?
 
   recipes  Recipe[]
   comments Comment[]
@@ -48,8 +48,8 @@ model BodyMeasurement {
   thinghCm Int? @map("thingh_cm")
   armCm    Int? @map("arm_cm")
 
-  activityLevel   ActivityLevel?
-  nutritionalGoal NutritionalGoal?
+  activityLevel ActivityLevel?
+  nutritionGoal NutritionGoal?
 
   user   User   @relation(fields: [userId], references: [id])
   userId String @unique @map("user_id")
@@ -78,7 +78,7 @@ enum ActivityLevel {
   VERY_ACTIVE
 }
 
-enum NutritionalGoal {
+enum NutritionGoal {
   WEIGHT_LOSS
   MAINTENANCE
   MUSCULE_GAIN

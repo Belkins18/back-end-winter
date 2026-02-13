@@ -3,6 +3,8 @@ import { IngredientsModule } from './ingredients/ingredients.module'
 import { RecipesResolver } from './recipes.resolver'
 import { RecipesService } from './recipes.service'
 
+import './recipe.enum'
+
 @Module({
 	providers: [RecipesResolver, RecipesService],
 	imports: [IngredientsModule]
