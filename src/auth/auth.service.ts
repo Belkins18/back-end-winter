@@ -1,19 +1,28 @@
-import { hash } from 'argon2'
+import { hash, verify } from 'argon2'
 
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+	BadRequestException,
+	Injectable,
+	NotFoundException
+} from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 
+import { PrismaService } from 'src/prisma/prisma.service'
+import { UsersService } from 'src/users/users.service'
+
+import { Response } from 'express'
+import { UTILS } from 'src/utils'
 import { AuthInput } from './auth.input'
 import { IAuthTokenData } from './auth.interface'
-import { PrismaService } from 'src/prisma/prisma.service'
 
 @Injectable()
 export class AuthService {
 	constructor(
 		private prisma: PrismaService,
 		private configService: ConfigService,
-		private jwt: JwtService
+		private jwt: JwtService,
+		private userService: UsersService
 	) {}
 
 	private EXPIRE_DAY_REFRESH_TOKEN = 3 // day
@@ -53,6 +62,34 @@ export class AuthService {
 		}
 	}
 
+	async login(input: AuthInput) {
+		const user = await this.validateUser(input)
+
+		const tokens = this.generateTokens({
+			id: user.id,
+			role: user.role
+		})
+
+		return { user, ...tokens }
+	}
+
+	private async validateUser(input: AuthInput) {
+		const email = input.email
+		const user = await this.userService.findByEmail(email)
+
+		if (!user) {
+			throw new NotFoundException('Invalid email or password')
+		}
+
+		const isPasswordValid = await verify(user.password, input.password)
+
+		if (!isPasswordValid) {
+			throw new NotFoundException('Invalid email or password')
+		}
+
+		return user
+	}
+
 	private generateTokens(data: IAuthTokenData) {
 		const accessToken = this.jwt.sign(data, {
 			expiresIn: '1h'
@@ -66,5 +103,23 @@ export class AuthService {
 		)
 
 		return { accessToken, refreshToken }
+	}
+
+	toggleRefreshTokenCookie(response: Response, token: string | null) {
+		const isRemoveCookie = !token
+
+		const expiresIn = isRemoveCookie
+			? new Date(0)
+			: new Date(
+					Date.now() + this.EXPIRE_DAY_REFRESH_TOKEN * 24 * 60 * 60 * 1000
+				)
+
+		response.cookie(this.REFRESH_TOKEN_NAME, token || '', {
+			httpOnly: true,
+			domain: 'localhost',
+			expires: expiresIn,
+			sameSite: UTILS.isDev(this.configService) ? 'none' : 'strict',
+			secure: true
+		})
 	}
 }
